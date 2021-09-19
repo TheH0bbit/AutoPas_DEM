@@ -1,5 +1,5 @@
 /**
- * @file DEMParticleTetra.h
+ * @file DEMParticlePolyhedra.h
  *
  * @date 07.07.2021
  * @author R. Penz
@@ -17,9 +17,9 @@ namespace autopas {
  * Particle class for the DEMFunctor.
  */
 template <typename floatType = double>
-class DEMParticle final : public Particle {
+class DEMParticlePolyhedra final : public Particle {
  public:
-  DEMParticle() = default;
+  DEMParticlePolyhedra() = default;
 
   /**
    * @param pos Position of the particle.
@@ -33,11 +33,11 @@ class DEMParticle final : public Particle {
    * 
    * 
    */
-  explicit DEMParticle(std::array<floatType, 3> pos, std::array<floatType, 3> v, unsigned long particleId,
+  explicit DEMParticlePolyhedra(std::array<floatType, 3> pos, std::array<floatType, 3> v, unsigned long particleId,
                       double rad = 0.0, double poisson = 0.0, double young = 0.0)
       : Particle(pos, v, particleId), _rad(rad), _poisson(poisson), _young(young) {}
 
-  ~DEMParticle() final = default;
+  ~DEMParticlePolyhedra() final = default;
 
   /**
    * Enums used as ids for accessing and creating a dynamically sized SoA.
@@ -86,7 +86,7 @@ class DEMParticle final : public Particle {
     } else if constexpr (attribute == AttributeNames::ownershipState) {
       return this->_ownershipState;
     } else {
-      utils::ExceptionHandler::exception("DEMParticle::get() unknown attribute {}", attribute);
+      utils::ExceptionHandler::exception("DEMParticlePolyhedra::get() unknown attribute {}", attribute);
     }
   }
 
@@ -121,7 +121,7 @@ class DEMParticle final : public Particle {
     } else if constexpr (attribute == AttributeNames::ownershipState) {
       this->_ownershipState = value;
     } else {
-      utils::ExceptionHandler::exception("DEMParticle::set() unknown attribute {}", attribute);
+      utils::ExceptionHandler::exception("DEMParticlePolyhedra::set() unknown attribute {}", attribute);
     }
   }
 

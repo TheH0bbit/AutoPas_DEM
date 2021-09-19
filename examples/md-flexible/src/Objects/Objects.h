@@ -31,6 +31,7 @@ class Object {
    * @param epsilon
    * @param sigma
    * @param mass
+   * 
    */
   Object(const std::array<double, 3> &velocity, unsigned long typeId, double epsilon, double sigma, double mass)
       : _velocity(velocity), _typeId(typeId), _epsilon(epsilon), _sigma(sigma), _mass(mass) {}

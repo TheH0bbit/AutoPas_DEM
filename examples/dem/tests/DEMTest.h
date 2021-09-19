@@ -3,7 +3,7 @@
 
 #include "AutoPasTestBase.h"
 
-class DEMTestTest : public AutoPasTestBase {
+class DEMTest : public AutoPasTestBase {
  public:
-  DEMTestTest() = default;
+  DEMTest() = default;
 };

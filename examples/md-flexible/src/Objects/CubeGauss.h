@@ -26,16 +26,22 @@ class CubeGauss : public Object {
    * @param distributionMean
    * @param distributionStdDev
    * @param bottomLeftCorner
+   * @param radius
+   * @param young
+   * @param poisson
    */
   CubeGauss(const std::array<double, 3> &velocity, unsigned long typeId, double epsilon, double sigma, double mass,
             size_t numParticles, const std::array<double, 3> &boxLength, const std::array<double, 3> &distributionMean,
-            const std::array<double, 3> &distributionStdDev, const std::array<double, 3> &bottomLeftCorner)
+            const std::array<double, 3> &distributionStdDev, const std::array<double, 3> &bottomLeftCorner, double radius, double young, double poisson)
       : Object(velocity, typeId, epsilon, sigma, mass),
         numParticles(numParticles),
         boxLength(boxLength),
         distributionMean(distributionMean),
         distributionStdDev(distributionStdDev),
-        bottomLeftCorner(bottomLeftCorner) {}
+        bottomLeftCorner(bottomLeftCorner),
+        radius(radius),
+        young(young),
+        poisson(poisson) {}
 
   /**
    * Getter for distribution mean
@@ -76,6 +82,9 @@ class CubeGauss : public Object {
 
   void generate(autopas::AutoPas<ParticleType> &autopas) const override {
     ParticleType dummyParticle = getDummyParticle(autopas);
+    dummyParticle.setRad(radius);
+    dummyParticle.setYoung(young);
+    dummyParticle.setPoisson(poisson);
     autopasTools::generators::GaussianGenerator::fillWithParticles(autopas, getBoxMin(), getBoxMax(), numParticles,
                                                                    dummyParticle, distributionMean, distributionStdDev);
   }
@@ -86,4 +95,7 @@ class CubeGauss : public Object {
   std::array<double, 3> distributionMean;
   std::array<double, 3> distributionStdDev;
   std::array<double, 3> bottomLeftCorner;
+  double radius;
+  double young;
+  double poisson;
 };

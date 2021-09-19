@@ -23,13 +23,19 @@ class Sphere : public Object {
    * @param center
    * @param radius
    * @param particleSpacing
+   * @param radiusP
+   * @param young
+   * @param poisson
    */
   Sphere(const std::array<double, 3> &velocity, unsigned long typeId, double epsilon, double sigma, double mass,
-         const std::array<double, 3> &center, int radius, double particleSpacing)
+         const std::array<double, 3> &center, int radius, double particleSpacing, double radiusP, double young, double poisson)
       : Object(velocity, typeId, epsilon, sigma, mass),
         center(center),
         radius(radius),
-        particleSpacing(particleSpacing) {}
+        particleSpacing(particleSpacing),
+        radiusP(radiusP),
+        young(young),
+        poisson(poisson) {}
 
   /**
    * Getter for center of Sphere
@@ -121,6 +127,9 @@ class Sphere : public Object {
     ParticleType dummyParticle = getDummyParticle(autopas);
     iteratePositions([&](auto pos) {
       dummyParticle.setR(pos);
+      dummyParticle.setRad(radiusP);
+      dummyParticle.setYoung(young);
+      dummyParticle.setPoisson(poisson);
       autopas.addParticle(dummyParticle);
       dummyParticle.setID(dummyParticle.getID() + 1);
     });
@@ -136,4 +145,7 @@ class Sphere : public Object {
    */
   int radius;
   double particleSpacing;
+  double radiusP;
+  double young;
+  double poisson;
 };

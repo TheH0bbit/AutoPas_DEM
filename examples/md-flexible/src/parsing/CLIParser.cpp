@@ -574,28 +574,28 @@ MDFlexParser::exitCodes MDFlexParser::CLIParser::parseInput(int argc, char **arg
       case MDFlexConfig::GeneratorOption::gaussian: {
         CubeGauss cubeGauss(velocity, typeID, epsilon, sigma, mass, config.particlesTotal.value,
                             {config.boxLength.value, config.boxLength.value, config.boxLength.value},
-                            config.distributionMean.value, config.distributionStdDev.value, bottomLeftCorner);
+                            config.distributionMean.value, config.distributionStdDev.value, bottomLeftCorner, radius, young, poisson);
         config.cubeGaussObjects.push_back(cubeGauss);
         break;
       }
       case MDFlexConfig::GeneratorOption::uniform: {
         CubeUniform cubeUniform(velocity, typeID, epsilon, sigma, mass, config.particlesTotal.value,
                                 {config.boxLength.value, config.boxLength.value, config.boxLength.value},
-                                bottomLeftCorner);
+                                bottomLeftCorner, radius, young, poisson);
         config.cubeUniformObjects.push_back(cubeUniform);
         break;
       }
       case MDFlexConfig::GeneratorOption::sphere: {
         auto centerOfBox = config.particlesPerDim.value / 2.;
         Sphere sphere(velocity, typeID, epsilon, sigma, mass, {centerOfBox, centerOfBox, centerOfBox}, centerOfBox,
-                      config.particleSpacing.value);
+                      config.particleSpacing.value, radius, young, poisson);
         config.sphereObjects.push_back(sphere);
         break;
       }
       case MDFlexConfig::GeneratorOption::closestPacked: {
         CubeClosestPacked cubeClosestPacked(velocity, typeID, epsilon, sigma, mass, config.particleSpacing.value,
                                             {config.boxLength.value, config.boxLength.value, config.boxLength.value},
-                                            bottomLeftCorner);
+                                            bottomLeftCorner, radius, young, poisson);
         config.cubeClosestPackedObjects.push_back(cubeClosestPacked);
         break;
       }

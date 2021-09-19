@@ -13,11 +13,11 @@ tuning-max-evidence              :  10
 functor                          :  DEM
 newton3                          :  [enabled]
 cutoff                           :  3
-# box-min                          :  [0, 0, 0]
-# box-max                          :  [7.25, 7.25, 7.25]
+# box-min                          :  [-14.25, -14.25, -0.5]
+# box-max                          :  [14.25, 14.25, 44.25]
 cell-size                        :  [1]
-deltaT                           :  0.05
-iterations                       :  900
+deltaT                           :  0.005
+iterations                       :  1000
 periodic-boundaries              :  true
 globalForce                      :  [0,0,-10]
 Objects:
@@ -27,7 +27,7 @@ Objects:
     0:  
       particles-per-dimension    :  [20, 20, 1]
       particle-spacing           :  1
-      bottomLeftCorner           :  [0, 0, 0]
+      bottomLeftCorner           :  [-10, -10, 0]
       velocity                   :  [0, 0, 0]
       particle-type              :  0
       particle-epsilon           :  1
@@ -36,7 +36,73 @@ Objects:
       particle-radius            :  1
       particle-young             :  0.5
       particle-poisson           :  0.45
-
+  #4 walls
+  CubeGrid:
+    1:  
+      particles-per-dimension    :  [20, 1, 40]
+      particle-spacing           :  1
+      bottomLeftCorner           :  [-10, -11, 1]
+      velocity                   :  [0, 0, 0]
+      particle-type              :  0
+      particle-epsilon           :  1
+      particle-sigma             :  1
+      particle-mass              :  1.79769e+308
+      particle-radius            :  1
+      particle-young             :  0.5
+      particle-poisson           :  0.45
+  CubeGrid:
+    2:  
+      particles-per-dimension    :  [20, 1, 40]
+      particle-spacing           :  1
+      bottomLeftCorner           :  [-10, 10, 1]
+      velocity                   :  [0, 0, 0]
+      particle-type              :  0
+      particle-epsilon           :  1
+      particle-sigma             :  1
+      particle-mass              :  1.79769e+308
+      particle-radius            :  1
+      particle-young             :  0.5
+      particle-poisson           :  0.45
+  CubeGrid:
+    3:  
+      particles-per-dimension    :  [1, 20, 40]
+      particle-spacing           :  1
+      bottomLeftCorner           :  [-11, -10, 1]
+      velocity                   :  [0, 0, 0]
+      particle-type              :  0
+      particle-epsilon           :  1
+      particle-sigma             :  1
+      particle-mass              :  1.79769e+308
+      particle-radius            :  1
+      particle-young             :  0.5
+      particle-poisson           :  0.45
+  CubeGrid:
+    4:  
+      particles-per-dimension    :  [1, 20, 40]
+      particle-spacing           :  1
+      bottomLeftCorner           :  [10, -10, 1]
+      velocity                   :  [0, 0, 0]
+      particle-type              :  0
+      particle-epsilon           :  1
+      particle-sigma             :  1
+      particle-mass              :  1.79769e+308
+      particle-radius            :  1
+      particle-young             :  0.5
+      particle-poisson           :  0.45
+  #fillingParticles
+  Sphere:
+    0:
+      center                     :  [0, 0, 30]
+      radius                     :  9
+      particle-spacing           :  1.5
+      velocity                   :  [0, 0, 0]
+      particle-type              :  1
+      particle-epsilon           :  1
+      particle-sigma             :  1
+      particle-mass              :  1
+      particle-radius            :  1
+      particle-young             :  0.5
+      particle-poisson           :  0.45
 vtk-filename                     :  BasicDemFunnel
 vtk-write-frequency              :  50
 no-flops                         :  false

@@ -29,14 +29,20 @@ class CubeClosestPacked : public Object {
    * @param particleSpacing distance between all neighboring particles
    * @param boxLength
    * @param bottomLeftCorner
+   * @param radius
+   * @param young
+   * @param poisson
    */
   CubeClosestPacked(const std::array<double, 3> &velocity, unsigned long typeId, double epsilon, double sigma,
                     double mass, double particleSpacing, const std::array<double, 3> &boxLength,
-                    const std::array<double, 3> &bottomLeftCorner)
+                    const std::array<double, 3> &bottomLeftCorner, double radius, double young, double poisson)
       : Object(velocity, typeId, epsilon, sigma, mass),
         boxLength(boxLength),
         particleSpacing(particleSpacing),
-        bottomLeftCorner(bottomLeftCorner) {}
+        bottomLeftCorner(bottomLeftCorner),
+        radius(radius),
+        young(young),
+        poisson(poisson) {}
 
   [[nodiscard]] double getParticleSpacing() const override { return particleSpacing; }
 
@@ -61,6 +67,9 @@ class CubeClosestPacked : public Object {
 
   void generate(autopas::AutoPas<ParticleType> &autopas) const override {
     ParticleType dummyParticle = getDummyParticle(autopas);
+    dummyParticle.setRad(radius);
+    dummyParticle.setYoung(young);
+    dummyParticle.setPoisson(poisson);
     autopasTools::generators::ClosestPackingGenerator::fillWithParticles(autopas, getBoxMin(), getBoxMax(),
                                                                          dummyParticle, particleSpacing);
   }
@@ -69,4 +78,7 @@ class CubeClosestPacked : public Object {
   double particleSpacing;
   std::array<double, 3> boxLength;
   std::array<double, 3> bottomLeftCorner;
+  double radius;
+  double young;
+  double poisson;
 };

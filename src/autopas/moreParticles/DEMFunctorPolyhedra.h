@@ -1,5 +1,5 @@
 /**
- * @file DEMFunctorC.h
+ * @file DEMFunctorPolyhedra.h
  *
  * @date 01.07.21
  * @author R. Penz
@@ -26,9 +26,9 @@ namespace autopas {
  */
 
 template <class Particle, FunctorN3Modes useNewton3 = FunctorN3Modes::Both>
-class DEMFunctor
+class DEMFunctorPolyhedra
     : public Functor<Particle,
-                     DEMFunctor<Particle, poisson1, poisson2, youngmod1, youngmod2, r1, r2>> {
+                     DEMFunctorPolyhedra<Particle, poisson1, poisson2, youngmod1, youngmod2, r1, r2>> {
   /**
    * Structure of the SoAs defined by the particle.
    */
@@ -43,7 +43,7 @@ class DEMFunctor
   /**
    * Deleted default constructor
    */
-  DEMFunctor() = delete;
+  DEMFunctorPolyhedra() = delete;
 
  private:
   /**
@@ -51,8 +51,8 @@ class DEMFunctor
    * @param cutoff
    * @note param dummy is unused, only there to make the signature different from the public constructor.
    */
-  explicit DEMFunctor(double cutoff, void * /*dummy*/)
-      : Functor<Particle, DEMFunctor<Particle, poisson1, poisson2, youngmod1, youngmod2, r1, r2>>(),
+  explicit DEMFunctorPolyhedra(double cutoff, void * /*dummy*/)
+      : Functor<Particle, DEMFunctorPolyhedra<Particle, poisson1, poisson2, youngmod1, youngmod2, r1, r2>>(),
         
 
   void AoSFunctor(Particle &i, Particle &j, bool newton3) final {
@@ -95,7 +95,10 @@ class DEMFunctor
      */
 
 
-    
+    /**
+     * Todo: imlement after tetrahedra functor/particle
+     * 
+     */
 
     auto dr = utils::ArrayMath::sub(i.getR(), j.getR()) //distance between ParticleCenters
     double penDepth = i.getRad()+j.getRad()-dr;

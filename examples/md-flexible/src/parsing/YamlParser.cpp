@@ -276,7 +276,10 @@ bool MDFlexParser::YamlParser::parseYamlFile(MDFlexConfig &config) {
                it->second[config.distributionStdDev.name][2].as<double>()},
               {it->second[MDFlexConfig::bottomLeftBackCornerStr][0].as<double>(),
                it->second[MDFlexConfig::bottomLeftBackCornerStr][1].as<double>(),
-               it->second[MDFlexConfig::bottomLeftBackCornerStr][2].as<double>()});
+               it->second[MDFlexConfig::bottomLeftBackCornerStr][2].as<double>()},
+               it->second[config.radius.name].as<double>(),
+               it->second[config.young.name].as<double>(),
+               it->second[config.poisson.name].as<double>());
           config.cubeGaussObjects.emplace_back(cubeGauss);
           config.addParticleType(it->second[MDFlexConfig::particleTypeStr].as<unsigned long>(),
                                  it->second[config.epsilonMap.name].as<double>(),
@@ -299,7 +302,10 @@ bool MDFlexParser::YamlParser::parseYamlFile(MDFlexConfig &config) {
                it->second[config.boxLength.name][2].as<double>()},
               {it->second[MDFlexConfig::bottomLeftBackCornerStr][0].as<double>(),
                it->second[MDFlexConfig::bottomLeftBackCornerStr][1].as<double>(),
-               it->second[MDFlexConfig::bottomLeftBackCornerStr][2].as<double>()});
+               it->second[MDFlexConfig::bottomLeftBackCornerStr][2].as<double>()},
+               it->second[config.radius.name].as<double>(),
+               it->second[config.young.name].as<double>(),
+               it->second[config.poisson.name].as<double>());
           config.cubeUniformObjects.emplace_back(cubeUniform);
           config.addParticleType(it->second[MDFlexConfig::particleTypeStr].as<unsigned long>(),
                                  it->second[config.epsilonMap.name].as<double>(),
@@ -320,7 +326,10 @@ bool MDFlexParser::YamlParser::parseYamlFile(MDFlexConfig &config) {
                          it->second[MDFlexConfig::sphereCenterStr][1].as<double>(),
                          it->second[MDFlexConfig::sphereCenterStr][2].as<double>()},
                         it->second[MDFlexConfig::sphereRadiusStr].as<int>(),
-                        it->second[config.particleSpacing.name].as<double>());
+                        it->second[config.particleSpacing.name].as<double>(),
+               it->second[config.radius.name].as<double>(),
+               it->second[config.young.name].as<double>(),
+               it->second[config.poisson.name].as<double>());
           config.sphereObjects.emplace_back(sphere);
           config.addParticleType(it->second[MDFlexConfig::particleTypeStr].as<unsigned long>(),
                                  it->second[config.epsilonMap.name].as<double>(),
@@ -342,7 +351,10 @@ bool MDFlexParser::YamlParser::parseYamlFile(MDFlexConfig &config) {
                it->second[config.boxLength.name][2].as<double>()},
               {it->second[MDFlexConfig::bottomLeftBackCornerStr][0].as<double>(),
                it->second[MDFlexConfig::bottomLeftBackCornerStr][1].as<double>(),
-               it->second[MDFlexConfig::bottomLeftBackCornerStr][2].as<double>()});
+               it->second[MDFlexConfig::bottomLeftBackCornerStr][2].as<double>()},
+               it->second[config.radius.name].as<double>(),
+               it->second[config.young.name].as<double>(),
+               it->second[config.poisson.name].as<double>());
           config.cubeClosestPackedObjects.emplace_back(cubeClosestPacked);
           config.addParticleType(it->second[MDFlexConfig::particleTypeStr].as<unsigned long>(),
                                  it->second[config.epsilonMap.name].as<double>(),
