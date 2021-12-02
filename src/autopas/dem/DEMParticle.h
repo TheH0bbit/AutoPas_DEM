@@ -22,6 +22,7 @@ class DEMParticle final : public Particle {
   DEMParticle() = default;
 
   /**
+   * Constructor of dem particle with initialization of additional parameters.
    * @param pos Position of the particle.
    * @param v Velocitiy of the particle.
    * @param particleId Id of the particle.
@@ -31,7 +32,7 @@ class DEMParticle final : public Particle {
    * 
    */
   explicit DEMParticle(std::array<floatType, 3> pos, std::array<floatType, 3> v, unsigned long particleId,
-                      double rad = 0.0, double poisson = 0.0, double young = 0.0)
+                      floatType rad = 0.0, floatType poisson = 0.0, floatType young = 0.0)
       : Particle(pos, v, particleId), _rad(rad), _poisson(poisson), _young(young) {}
 
   ~DEMParticle() final = default;
@@ -208,22 +209,22 @@ class DEMParticle final : public Particle {
     /**
    * Particle radius.
    */
-  double _rad = 0.0;
+  floatType _rad = 0.0;
 
   /**
    * Particle Poisson ratio.
    */
-  double _poisson = 0.0;  
+  floatType _poisson = 0.0;  
   
   /**
    * Particle Young modulus.
    */
-  double _young = 0.0;
+  floatType _young = 0.0;
 
   /**
    * Particle Mass.
    */
-  double _mass = 1.0;
+  floatType _mass = 1.0;
 
   /**
    * TypeId, needed for compability

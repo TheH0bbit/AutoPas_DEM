@@ -551,7 +551,7 @@ MDFlexParser::exitCodes MDFlexParser::CLIParser::parseInput(int argc, char **arg
 
   // only create objects if nothing was set by a yaml file and there was no checkpoint
   if (config.checkpointfile.value.empty() and config.cubeGaussObjects.empty() and config.cubeGridObjects.empty() and
-      config.cubeUniformObjects.empty() and config.sphereObjects.empty() and config.cubeClosestPackedObjects.empty()) {
+      config.cubeUniformObjects.empty() and config.sphereObjects.empty() and config.cubeClosestPackedObjects.empty() and config.trapezGridObjects.empty()) {
     // common settings for any object type:
     unsigned int typeID = 0;
     double epsilon = 1.;
@@ -560,6 +560,7 @@ MDFlexParser::exitCodes MDFlexParser::CLIParser::parseInput(int argc, char **arg
     double radius = 1.;
     double young = 1.;
     double poisson = 0.;
+    bool inXDirection = true;
     std::array<double, 3> bottomLeftCorner = {0, 0, 0};
     std::array<double, 3> velocity = {0, 0, 0};
 
@@ -597,6 +598,13 @@ MDFlexParser::exitCodes MDFlexParser::CLIParser::parseInput(int argc, char **arg
                                             {config.boxLength.value, config.boxLength.value, config.boxLength.value},
                                             bottomLeftCorner, radius, young, poisson);
         config.cubeClosestPackedObjects.push_back(cubeClosestPacked);
+        break;
+      }
+      case MDFlexConfig::GeneratorOption::trapezGrid: {
+        TrapezGrid trapezGrid(velocity, typeID, epsilon, sigma, mass,
+                      {config.particlesPerDim.value, config.particlesPerDim.value, config.particlesPerDim.value},
+                      config.particleSpacing.value, bottomLeftCorner, radius, young, poisson, inXDirection);
+        config.trapezGridObjects.push_back(trapezGrid);
         break;
       }
     }

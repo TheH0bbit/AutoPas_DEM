@@ -105,6 +105,7 @@ std::string MDFlexConfig::to_string() const {
   printObjectCollection(cubeGaussObjects, cubeGaussObjectsStr, os);
   printObjectCollection(cubeUniformObjects, cubeUniformObjectsStr, os);
   printObjectCollection(sphereObjects, sphereObjectsStr, os);
+  printObjectCollection(trapezGridObjects, trapezGridObjectsStr, os);
 
   if (not globalForceIsZero()) {
     os << setw(valueOffset) << left << globalForce.name << ":  "
@@ -160,6 +161,7 @@ void MDFlexConfig::calcSimulationBox() {
   resizeToObjectLimits(cubeUniformObjects);
   resizeToObjectLimits(sphereObjects);
   resizeToObjectLimits(cubeClosestPackedObjects);
+  resizeToObjectLimits(trapezGridObjects);
 
   // guarantee the box is at least of size interationLength
   for (int i = 0; i < 3; i++) {

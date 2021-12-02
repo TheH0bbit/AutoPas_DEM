@@ -88,10 +88,13 @@ void calculatePositionsDEM(AutoPasTemplate &autopas, const ParticlePropertiesLib
     auto f = iter->getF();
     iter->setOldF(f);
     iter->setF({0., 0., 0.});
-    v = mulScalar(v, deltaT);
-    f = mulScalar(f, (deltaT * deltaT / (2 * m)));
-    auto newR = add(v, f);
+    if(m < 1000){
+      v = mulScalar(v, deltaT);
+      f = mulScalar(f, (deltaT * deltaT / (2 * m)));
+      auto newR = add(v, f);
     iter->addR(newR);
+    }
+    
   }
 }
 
@@ -114,10 +117,12 @@ void calculateVelocitiesDEM(AutoPasTemplate &autopas, const ParticlePropertiesLi
 #endif
   for (auto iter = autopas.begin(autopas::IteratorBehavior::owned); iter.isValid(); ++iter) {
     auto m = iter->getMass();
-    auto force = iter->getF();
-    auto oldForce = iter->getOldf();
-    auto newV = mulScalar((add(force, oldForce)), deltaT / (2 * m));
+    if(m < 1000){
+      auto force = iter->getF();
+      auto oldForce = iter->getOldf();
+      auto newV = mulScalar((add(force, oldForce)), deltaT / (2 * m));
     iter->addV(newV);
+    }
   }
 }
 

@@ -28,6 +28,7 @@
 #include "src/Objects/CubeGrid.h"
 #include "src/Objects/CubeUniform.h"
 #include "src/Objects/Sphere.h"
+#include "src/Objects/TrapezGrid.h"
 
 /**
  * Class containing all necessary parameters for configuring a md-flexible simulation.
@@ -134,7 +135,7 @@ class MDFlexConfig {
   /**
    * Choice of the particle generators specified in the command line
    */
-  enum class GeneratorOption { grid, uniform, gaussian, sphere, closestPacked };
+  enum class GeneratorOption { grid, uniform, gaussian, sphere, closestPacked, trapezGrid };
 
   //  All options in the config
   //  Make sure that the description is parsable by `CLIParser::createZSHCompletionFile()`!
@@ -386,14 +387,14 @@ class MDFlexConfig {
   MDFlexOption<double, __LINE__> radius{1, "particle-radius", true,
                                         "Radius of DEM Particles."};
   /**
-   * DEM - radius
+   * DEM - young mod
    */
   MDFlexOption<double, __LINE__> young{1, "particle-young", true,
                                         "Modulus of elasticity(Young Modulus) of DEM Particles."};
   /**
-   * DEM - radius
+   * DEM - poisson ratio
    */
-  MDFlexOption<double, __LINE__> poisson{0, "particle-radius", true,
+  MDFlexOption<double, __LINE__> poisson{0, "particle-poisson", true,
                                         "Poisson Ratio of DEM Particles."};
 
   // Options for additional Object Generation on command line
@@ -466,6 +467,20 @@ class MDFlexConfig {
    * cubeGridObjects
    */
   std::vector<CubeGrid> cubeGridObjects{};
+  /**
+   * trapezGridObjectsStr
+   */
+  static inline const char *const trapezGridObjectsStr{"TrapezGrid"};
+  /**
+   * trapezGridObjects
+   */
+  std::vector<TrapezGrid> trapezGridObjects{};
+  /**
+   * inXDirection
+   */
+  MDFlexOption<bool, __LINE__> inXDirection{
+      true, "inXDirection", true,
+      "Decides in which direction the trapez is built - true -> x direction, false -> y direction"};
   /**
    * cubeGaussObjectsStr
    */
@@ -543,7 +558,7 @@ class MDFlexConfig {
       true, "addBrownianMotion", true,
       "Thermostat option. Whether the particle velocities should be initialized using "
       "Brownian motion. Possible Values: (true false) Default: true"};
-
+      
   /**
    * Global external force like e.g. gravity
    */

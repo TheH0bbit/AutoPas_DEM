@@ -107,7 +107,6 @@ void Simulation::initialize(const MDFlexConfig &mdFlexConfig, autopas::AutoPas<P
   for (const auto &object : _config->cubeGridObjects) {
     object.generate(autopas);
   }
-  /*
   for (const auto &object : _config->cubeGaussObjects) {
     object.generate(autopas);
   }
@@ -120,7 +119,10 @@ void Simulation::initialize(const MDFlexConfig &mdFlexConfig, autopas::AutoPas<P
   for (const auto &object : _config->cubeClosestPackedObjects) {
     object.generate(autopas);
   }
-  */
+  for (const auto &object : _config->trapezGridObjects) {
+    object.generate(autopas);
+  }
+
 
   // initializing system to initial temperature and Brownian motion
   if (_config->useThermostat.value and _config->deltaT.value != 0) {
@@ -142,8 +144,6 @@ void Simulation::calculateForces(autopas::AutoPas<ParticleType> &autopas) {
   // pairwise forces
 
   _timers.forceUpdatePairwise.start();
-
-//todo ? ------------------------------------------------------------------------------------------------------------------------------------------
 
   FunctorType functor{autopas.getCutoff()};
   bool tuningIteration = autopas.iteratePairwise(&functor);
@@ -191,7 +191,7 @@ void Simulation::globalForces(autopas::AutoPas<ParticleType> &autopas) {
 
 
 void Simulation::simulate(autopas::AutoPas<ParticleType> &autopas) {
-  this->_homogeneity = Simulation::calculateHomogeneity(autopas);
+  //this->_homogeneity = Simulation::calculateHomogeneity(autopas);
   _timers.simulate.start();
 
   auto [maxIterationsEstimate, maxIterationsIsPrecise] = estimateNumIterations();
@@ -345,7 +345,7 @@ void Simulation::printStatistics(autopas::AutoPas<ParticleType> &autopas) {
        << autopas.getNumberOfParticles(autopas::IteratorBehavior::ownedOrHalo) << endl;
   cout << "  Owned: " << autopas.getNumberOfParticles(autopas::IteratorBehavior::owned) << endl;
   cout << "  Halo : " << autopas.getNumberOfParticles(autopas::IteratorBehavior::halo) << endl;
-  cout << "Standard Deviation of Homogeneity    : " << _homogeneity << endl;
+  //cout << "Standard Deviation of Homogeneity    : " << _homogeneity << endl;
 
   cout << fixed << setprecision(_floatStringPrecision);
   cout << "Measurements:" << endl;

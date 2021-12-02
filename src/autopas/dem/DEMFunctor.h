@@ -8,6 +8,7 @@
 #pragma once
 
 #include <array>
+#include <cmath>
 
 #include "autopas/pairwiseFunctors/Functor.h"
 #include "autopas/particles/OwnershipState.h"
@@ -64,14 +65,7 @@ class DEMFunctor
     return useNewton3 == FunctorN3Modes::Newton3Off or useNewton3 == FunctorN3Modes::Both;
   }
         
-  void AoSFunctor(Particle &i, Particle &j, bool newton3) final {
-    if (i.isDummy() or j.isDummy()) {
-      return;
-    }
-
-    //todo: AOS functor code DEMContact
-
-    /**
+/**
      * Hertz elastic Solution
      * F = 4/3*E*sqrt(R)*sqrt(delta^3)
      * R = R1*R2/(R1+R2)
@@ -85,11 +79,15 @@ class DEMFunctor
      * delta - approach distance
      */
 
+  void AoSFunctor(Particle &i, Particle &j, bool newton3) final {
+    if (i.isDummy() or j.isDummy()) {
+      return;
+    }
+    
     auto dr = utils::ArrayMath::sub(i.getR(), j.getR()); //distance between ParticleCenters
     double penDepth = i.getRad()+j.getRad()-utils::ArrayMath::L2Norm(dr);
 
     if(penDepth <= 0) return; //return if Particles dont intersect
-
     double e1 = (1-pow(i.getPoisson(), 2))/i.getYoung();
     double e2 = (1-pow(j.getPoisson(), 2))/j.getYoung();
     double e = 1/(e1+e2);
@@ -98,7 +96,7 @@ class DEMFunctor
 
     //calculate Force and ForceVector
     double f = 4/3*e*sqrt(r)*pow(penDepth, 3./2.);
-    auto vecf = utils::ArrayMath::mulScalar(utils::ArrayMath::normalize(dr),f);
+    auto vecf = utils::ArrayMath::mulScalar (utils::ArrayMath::normalize(dr),f);
     i.addF(vecf);
     if(newton3)
     {
@@ -106,9 +104,13 @@ class DEMFunctor
     }
   }
 
-  void SoAFunctorCalc(SoAView<SoAArraysType> soa1, SoAView<SoAArraysType> soa2,  size_t shift, bool newton3)
+  void SoAFunctorCalc(SoAView<SoAArraysType> soa1, SoAView<SoAArraysType> soa2,  bool single, bool newton3)
   {
     if (soa1.getNumParticles() == 0 || soa2.getNumParticles() == 0) return;
+    size_t shift = 0;
+
+    const auto *const __restrict id1ptr = soa1.template begin<Particle::AttributeNames::id>();
+    const auto *const __restrict id2ptr = soa2.template begin<Particle::AttributeNames::id>();
 
     const auto *const __restrict x1ptr = soa1.template begin<Particle::AttributeNames::posX>();
     const auto *const __restrict y1ptr = soa1.template begin<Particle::AttributeNames::posY>();
@@ -135,6 +137,7 @@ class DEMFunctor
     const auto *const __restrict ownership2ptr = soa2.template begin<Particle::AttributeNames::ownershipState>();
     
     for(unsigned int i = 0; i < soa1.getNumParticles(); ++i) {
+      if(single){shift++;}  //increase shift by 1 if single View
       const auto ownedStateI = ownership1ptr[i];
       if(ownedStateI == OwnershipState::dummy) {return;}
 
@@ -142,13 +145,12 @@ class DEMFunctor
       SoAFloatPrecision fxacc = 0;
       SoAFloatPrecision fyacc = 0;
       SoAFloatPrecision fzacc = 0;
-
     
 // icpc vectorizes this.
 // g++ only with -ffast-math or -funsafe-math-optimizations
 // shift for SoAFunctorSingle
 #pragma omp simd reduction(+ : fxacc, fyacc, fzacc)
-     for (unsigned int j = i+shift; j < soa1.getNumParticles(); ++j) {
+     for (unsigned int j = shift; j < soa2.getNumParticles(); ++j) {
         const auto ownedStateJ = ownership2ptr[j];
 
         const SoAFloatPrecision drx = x1ptr[i] - x2ptr[j];
@@ -213,102 +215,9 @@ class DEMFunctor
    */
   void SoAFunctorSingle(SoAView<SoAArraysType> soa, bool newton3) final {
 
-    SoAFunctorCalc(soa, soa, 1, newton3);
+    SoAFunctorCalc(soa, soa, true, newton3);
 
   }
-
-    /**
-    * old version of SoAFunctorSingle, keep for the moment
-    */
-
-    /*
-    if (soa.getNumParticles() == 0) return;
-
-    const auto *const __restrict xptr = soa.template begin<Particle::AttributeNames::posX>();
-    const auto *const __restrict yptr = soa.template begin<Particle::AttributeNames::posY>();
-    const auto *const __restrict zptr = soa.template begin<Particle::AttributeNames::posZ>();
-
-    const auto *const __restrict fxptr = soa.template begin<Particle::AttributeNames::forceX>();
-    const auto *const __restrict fyptr = soa.template begin<Particle::AttributeNames::forceY>();
-    const auto *const __restrict fzptr = soa.template begin<Particle::AttributeNames::force>();
-
-    const auto *const __restrict radptr = soa.template begin<Particle::AttributeNames::rad>();
-    const auto *const __restrict poissonptr = soa.template begin<Particle::AttributeNames::poisson>();
-    const auto *const __restrict youngptr = soa.template begin<Particle::AttributeNames::young>();
-
-    const auto *const __restrict ownershipptr = soa.template begin<Particle::AttributeNames::ownershipState>();
-    
-    for(unsigned int i = 0; i < soa.getNumParticles(); ++i) {
-      const auto ownedStateI = ownershipptr[i];
-      if(ownedStateI == OwnershipState::dummy) {return;}
-
-      //accumulating Force directions
-      SoAFloatPrecision fxacc = 0;
-      SoAFloatPrecision fyacc = 0;
-      SoAFloatPrecision fzacc = 0;
-
-    
-// icpc vectorizes this.
-// g++ only with -ffast-math or -funsafe-math-optimizations
-#pragma omp simd reduction(+ : fxacc, fyacc, fzacc)
-     for(unsigned int j = i+1; j < soa.getNumParticles(); ++j) {
-        const auto ownedStateJ = ownershipptr[j];
-
-        const SoAFloatPrecision drx = xptr[i] - xptr[j];
-        const SoAFloatPrecision dry = yptr[i] - yptr[j];
-        const SoAFloatPrecision drz = zptr[i] - zptr[j];
-
-        const SoAFloatPrecision drx2 = drx * drx;
-        const SoAFloatPrecision dry2 = dry * dry;
-        const SoAFloatPrecision drz2 = drz * drz;
-
-        const SoAFloatPrecision dr2 = drx2 + dry2 + drz2;
-        const SoAFloatPrecision dr = sqrt(dr2);
-
-        const SoAFloatPrecision radI = radptr[i];
-        const SoAFloatPrecision radJ = radptr[j];
-        const SoAFloatPrecision rad = radI + radJ;
-
-        // Mask away if particles arent intersecting or if j is dummy.
-        // Particle ownedStateI was already checked previously.
-        const bool mask = dr <= rad and ownedStateJ != OwnershipState::dummy;
-
-        const SoAFloatPrecision poissonI = poissonptr[i];
-        const SoAFloatPrecision youngI = youngptr[i];
-        const SoAFloatPrecision poissonJ = poissonptr[j];
-        const SoAFloatPrecision youngJ = youngptr[j];
-
-        const SoAFloatPrecision poissonI2 = poissonI * poissonI;
-        const SoAFloatPrecision poissonJ2 = poissonJ * poissonJ;
-        const SoAFloatPrecision e1 = (1. - poissonI2)/youngI;
-        const SoAFloatPrecision e2 = (1. - poissonJ2)/youngJ;
-        const SoAFloatPrecision esum = e1 + e2;
-        const SoAFloatPrecision e = 1. / esum;
-
-        const SoAFloatPrecision penDepth = rad - dr;
-
-        const SoAFloatPrecision r = radI * radJ / rad;
-        const SoAFloatPrecision fac = mask ? 4/3 * e * sqrt(r) * pow(penDepth, 3./2.) / dr : 0.;
-
-        const SoAFloatPrecision fx = drx * fac;
-        const SoAFloatPrecision fy = dry * fac;
-        const SoAFloatPrecision fz = drz * fac;
-
-        fxacc += fx;
-        fyacc += fy;
-        fzacc += fz;
-
-        fxptr[j] -=fx;
-        fyptr[j] -=fy;
-        fzptr[j] -=fz;
-      }
-
-      fxptr[i] += fxacc;
-      fyptr[i] += fyacc;
-      fzptr[i] += fzacc;
-    }
-  }
-  */
 
   /**
    * @copydoc Functor::SoAFunctorPair(SoAView<SoAArraysType> soa1, SoAView<SoAArraysType> soa2, bool newton3)
@@ -331,7 +240,7 @@ class DEMFunctor
    */
   template <bool newton3>
   void SoAFunctorPairImpl(SoAView<SoAArraysType> soa1, SoAView<SoAArraysType> soa2) {
-    SoAFunctorCalc(soa1, soa2, 0, newton3);
+    SoAFunctorCalc(soa1, soa2, false, newton3);
   }
 
  public:
@@ -359,7 +268,7 @@ class DEMFunctor
         Particle::AttributeNames::id,     Particle::AttributeNames::posX,   Particle::AttributeNames::posY,
         Particle::AttributeNames::posZ,   Particle::AttributeNames::forceX, Particle::AttributeNames::forceY,
         Particle::AttributeNames::forceZ, Particle::AttributeNames::rad,    Particle::AttributeNames::poisson, 
-        Particle::AttributeNames::young,  Particle::AttributeNames::typeId,  Particle::AttributeNames::ownershipState};
+        Particle::AttributeNames::young,  Particle::AttributeNames::typeId, Particle::AttributeNames::ownershipState};
   }
 
   /**
@@ -380,7 +289,6 @@ class DEMFunctor
         Particle::AttributeNames::forceX, Particle::AttributeNames::forceY, Particle::AttributeNames::forceZ};
   }
 
-
   /**
    * Get the number of flops used per kernel call. This should count the
    * floating point operations needed for two particles that lie within a cutoff
@@ -393,7 +301,6 @@ class DEMFunctor
     return 18ul;
   }
 
-
   void initTraversal() final {
     _postProcessed = false;
   }
@@ -404,7 +311,6 @@ class DEMFunctor
           "Already postprocessed, endTraversal(bool newton3) was called twice without calling initTraversal().");
     }
   }
-
 
  private:
   template <bool newton3>
@@ -488,8 +394,6 @@ class DEMFunctor
 #pragma omp simd reduction(+ : fxacc, fyacc, fzacc) safelen(vecsize)
         for (size_t j = 0; j < vecsize; j++) {
 
-          // const size_t j = currentList[jNeighIndex];
-
           const auto ownedStateJ = ownedStateArr[j];
 
           const SoAFloatPrecision drx = xtmp[j] - xArr[j];
@@ -508,7 +412,7 @@ class DEMFunctor
           const SoAFloatPrecision rad = radI + radJ;
 
           // Mask away if particles arent intersecting or if j is dummy.
-          const bool mask = dr <= rad and ownedStateJ != OwnershipState::dummy;
+          const bool mask = dr <= rad and ownedStateJ != OwnershipState::dummy and dr != 0;
 
           const SoAFloatPrecision poissonI = poissontmp[j];
           const SoAFloatPrecision youngI = youngtmp[j];
@@ -526,7 +430,7 @@ class DEMFunctor
 
           const SoAFloatPrecision r = radI * radJ / rad;
           const SoAFloatPrecision fac = mask ? 4/3 * e * sqrt(r) * pow(penDepth, 3./2.) / dr : 0.;
-
+          
           const SoAFloatPrecision fx = drx * fac;
           const SoAFloatPrecision fy = dry * fac;
           const SoAFloatPrecision fz = drz * fac;
@@ -578,7 +482,7 @@ class DEMFunctor
       const SoAFloatPrecision radJ = radptr[j];
       const SoAFloatPrecision rad = radI + radJ;
 
-      if(dr <= rad) {continue;}
+      if(dr >= rad | dr == 0) {continue;}
 
       const SoAFloatPrecision poissonI = poissonptr[indexFirst];
       const SoAFloatPrecision youngI = youngptr[indexFirst];
